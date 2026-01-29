@@ -35,3 +35,9 @@ go.work.sum
 /dist
 /build
 
+# goversioninfo 生成的资源文件
+*.syso
+
+# AI 记忆文件
+.ai_memory/
+
