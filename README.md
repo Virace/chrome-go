@@ -2,11 +2,11 @@
 
 > 🚀 一键部署便携版 Chrome，自动更新 Chrome 浏览器与 Chrome++ 增强组件
 
-[![GitHub Release](https://img.shields.io/github/v/release/X-Item/chromego?style=flat-square&logo=github)](https://github.com/X-Item/chromego/releases/latest)
+[![GitHub Release](https://img.shields.io/github/v/release/Virace/chrome-go?style=flat-square&logo=github)](https://github.com/Virace/chrome-go/releases/latest)
 [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat-square&logo=go)](https://go.dev/)
-[![License](https://img.shields.io/github/license/X-Item/chromego?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/github/license/Virace/chrome-go?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows_x64-0078D6?style=flat-square&logo=windows)](https://www.microsoft.com/windows)
-[![GitHub Downloads](https://img.shields.io/github/downloads/X-Item/chromego/total?style=flat-square&logo=github)](https://github.com/X-Item/chromego/releases)
+[![GitHub Downloads](https://img.shields.io/github/downloads/Virace/chrome-go/total?style=flat-square&logo=github)](https://github.com/Virace/chrome-go/releases)
 
 ## ✨ 功能特性
 
@@ -22,7 +22,7 @@
 
 ### 下载
 
-从 [Releases](https://github.com/X-Item/chromego/releases/latest) 页面下载最新版本。
+从 [Releases](https://github.com/Virace/chrome-go/releases/latest) 页面下载最新版本。
 
 ### 目录结构
 
@@ -80,8 +80,8 @@ ChromeGo/
 
 ```powershell
 # 克隆仓库
-git clone https://github.com/X-Item/chromego.git
-cd chromego
+git clone https://github.com/Virace/chrome-go.git
+cd chrome-go
 
 # 使用构建脚本（推荐）
 .\scripts\build.ps1

@@ -1,4 +1,4 @@
-module github.com/X-Item/chromego
+module github.com/Virace/chrome-go
 
 go 1.21
 

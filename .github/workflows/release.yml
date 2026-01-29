@@ -39,9 +39,9 @@ jobs:
         shell: pwsh
         run: |
           $ldflags = "-H=windowsgui -s -w"
-          $ldflags += " -X 'github.com/X-Item/chromego/internal.Version=${{ steps.version.outputs.VERSION }}'"
-          $ldflags += " -X 'github.com/X-Item/chromego/internal.Commit=${{ steps.version.outputs.COMMIT }}'"
-          $ldflags += " -X 'github.com/X-Item/chromego/internal.BuildTime=${{ steps.version.outputs.BUILD_TIME }}'"
+          $ldflags += " -X 'github.com/Virace/chrome-go/internal.Version=${{ steps.version.outputs.VERSION }}'"
+          $ldflags += " -X 'github.com/Virace/chrome-go/internal.Commit=${{ steps.version.outputs.COMMIT }}'"
+          $ldflags += " -X 'github.com/Virace/chrome-go/internal.BuildTime=${{ steps.version.outputs.BUILD_TIME }}'"
           
           go build -ldflags $ldflags -o ChromeGo.exe ./cmd/chromego
           

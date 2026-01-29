@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/X-Item/chromego/internal"
+	"github.com/Virace/chrome-go/internal"
 )
 
 func main() {

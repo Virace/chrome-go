@@ -46,9 +46,9 @@ try {
     if (-not $Debug) {
         $ldflags += " -s -w"
     }
-    $ldflags += " -X 'github.com/X-Item/chromego/internal.Version=$version'"
-    $ldflags += " -X 'github.com/X-Item/chromego/internal.Commit=$commit'"
-    $ldflags += " -X 'github.com/X-Item/chromego/internal.BuildTime=$buildTime'"
+    $ldflags += " -X 'github.com/Virace/chrome-go/internal.Version=$version'"
+    $ldflags += " -X 'github.com/Virace/chrome-go/internal.Commit=$commit'"
+    $ldflags += " -X 'github.com/Virace/chrome-go/internal.BuildTime=$buildTime'"
 
     # 编译
     $outputPath = Join-Path $distDir "ChromeGo.exe"
