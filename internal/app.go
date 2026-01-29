@@ -5,6 +5,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"sort"
+	"strings"
 )
 
 // Run 主应用入口
@@ -71,12 +74,13 @@ func Run() {
 		return
 	}
 
-	// 构建提示消息
+	// 构建提示消息（所有更新都提示手动关闭浏览器）
 	var message string
 	if !chromeExists {
 		message = fmt.Sprintf("未检测到 Chrome，是否下载安装？\n\n"+
 			"Chrome 版本: %s\n"+
-			"Chrome++ 版本: %s",
+			"Chrome++ 版本: %s\n\n"+
+			"请确保已关闭所有 Chrome 窗口后点击\"是\"开始安装",
 			latestVersion.ChromeVersion, latestVersion.ChromePlusVersion)
 	} else {
 		var updates []string
@@ -135,6 +139,11 @@ func Run() {
 		}
 	}
 
+	// Chrome 更新后清理旧版本
+	if needChromeUpdate {
+		cleanupOldVersions(cfg)
+	}
+
 	// 显示完成信息
 	var completeMsg string
 	if needChromeUpdate && needChromePlusUpdate {
@@ -149,6 +158,67 @@ func Run() {
 
 	// 启动 Chrome
 	startChrome(chromePath)
+}
+
+// cleanupOldVersions 清理旧版本目录
+func cleanupOldVersions(cfg *Config) {
+	appDir := cfg.GetAppDir()
+	keepCount := cfg.GetKeepVersions()
+
+	// 查找版本目录（格式如 123.0.6312.86）
+	entries, err := os.ReadDir(appDir)
+	if err != nil {
+		return
+	}
+
+	// 版本号正则
+	versionRegex := regexp.MustCompile(`^\d+\.\d+\.\d+\.\d+$`)
+	var versionDirs []string
+
+	for _, entry := range entries {
+		if entry.IsDir() && versionRegex.MatchString(entry.Name()) {
+			versionDirs = append(versionDirs, entry.Name())
+		}
+	}
+
+	// 如果版本目录数量不超过保留数量，无需清理
+	if len(versionDirs) <= keepCount {
+		return
+	}
+
+	// 按版本号排序（降序，最新的在前）
+	sort.Slice(versionDirs, func(i, j int) bool {
+		return CompareVersion(versionDirs[j], versionDirs[i])
+	})
+
+	// 获取需要删除的旧版本
+	toDelete := versionDirs[keepCount:]
+	if len(toDelete) == 0 {
+		return
+	}
+
+	// 构建确认消息
+	var deleteList []string
+	for _, v := range toDelete {
+		deleteList = append(deleteList, v)
+	}
+
+	message := fmt.Sprintf("发现 %d 个旧版本目录，是否删除？\n\n%s\n\n（将保留最新的 %d 个版本）",
+		len(toDelete), strings.Join(deleteList, "\n"), keepCount)
+
+	if !ShowConfirm("清理旧版本", message) {
+		return
+	}
+
+	// 执行删除
+	for _, v := range toDelete {
+		versionPath := filepath.Join(appDir, v)
+		if err := os.RemoveAll(versionPath); err != nil {
+			fmt.Printf("删除 %s 失败: %v\n", v, err)
+		} else {
+			fmt.Printf("已删除旧版本: %s\n", v)
+		}
+	}
 }
 
 // fileExists 检查文件是否存在

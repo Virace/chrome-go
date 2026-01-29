@@ -56,7 +56,8 @@ ChromeGo/
   "channel": "stable",
   "version": "",
   "chrome_plus_version": "",
-  "threads": 16
+  "threads": 16,
+  "keep_versions": 3
 }
 ```
 
@@ -67,6 +68,7 @@ ChromeGo/
 | `version` | 当前已安装 Chrome 版本（自动管理） | - |
 | `chrome_plus_version` | 当前已安装 Chrome++ 版本（自动管理） | - |
 | `threads` | 下载线程数 (1-64) | `16` |
+| `keep_versions` | 保留旧版本数量 | `3` |
 
 ## 🔨 从源码构建
 

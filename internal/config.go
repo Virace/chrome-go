@@ -13,6 +13,7 @@ type Config struct {
 	Version           string `json:"version"`             // 当前已安装的 Chrome 版本
 	ChromePlusVersion string `json:"chrome_plus_version"` // 当前已安装的 Chrome++ 版本
 	Threads           int    `json:"threads"`             // 下载线程数，默认 16
+	KeepVersions      int    `json:"keep_versions"`       // 保留旧版本数量，默认 3
 }
 
 // DefaultConfig 返回默认配置
@@ -23,6 +24,7 @@ func DefaultConfig() *Config {
 		Version:           "",
 		ChromePlusVersion: "",
 		Threads:           16,
+		KeepVersions:      3,
 	}
 }
 
@@ -35,6 +37,14 @@ func (c *Config) GetThreads() int {
 		return 64
 	}
 	return c.Threads
+}
+
+// GetKeepVersions 获取保留旧版本数量
+func (c *Config) GetKeepVersions() int {
+	if c.KeepVersions <= 0 {
+		return 3
+	}
+	return c.KeepVersions
 }
 
 // ConfigPath 返回配置文件路径
@@ -96,4 +106,11 @@ func (c *Config) GetChromePlusIniPath() string {
 	exe, _ := os.Executable()
 	baseDir := filepath.Dir(exe)
 	return filepath.Join(baseDir, c.ChromePath, "chrome++.ini")
+}
+
+// GetAppDir 获取 App 目录的绝对路径
+func (c *Config) GetAppDir() string {
+	exe, _ := os.Executable()
+	baseDir := filepath.Dir(exe)
+	return filepath.Join(baseDir, c.ChromePath)
 }
