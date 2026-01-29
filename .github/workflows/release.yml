@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      
+      - name: Get version info
+        id: version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}"
+          $commit = "${{ github.sha }}".Substring(0, 7)
+          $buildTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+          
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+          echo "COMMIT=$commit" >> $env:GITHUB_OUTPUT
+          echo "BUILD_TIME=$buildTime" >> $env:GITHUB_OUTPUT
+      
+      - name: Build
+        shell: pwsh
+        run: |
+          $ldflags = "-H=windowsgui -s -w"
+          $ldflags += " -X 'github.com/X-Item/chromego/internal.Version=${{ steps.version.outputs.VERSION }}'"
+          $ldflags += " -X 'github.com/X-Item/chromego/internal.Commit=${{ steps.version.outputs.COMMIT }}'"
+          $ldflags += " -X 'github.com/X-Item/chromego/internal.BuildTime=${{ steps.version.outputs.BUILD_TIME }}'"
+          
+          go build -ldflags $ldflags -o ChromeGo.exe ./cmd/chromego
+          
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Build failed"
+            exit 1
+          }
+          
+          $size = [math]::Round((Get-Item ChromeGo.exe).Length / 1MB, 2)
+          Write-Host "Build successful: ChromeGo.exe ($size MB)"
+      
+      - name: Install UPX
+        shell: pwsh
+        run: |
+          choco install upx -y
+      
+      - name: Compress with UPX
+        shell: pwsh
+        run: |
+          $before = (Get-Item ChromeGo.exe).Length
+          upx --best --lzma ChromeGo.exe
+          $after = (Get-Item ChromeGo.exe).Length
+          $ratio = [math]::Round(($after / $before) * 100, 1)
+          Write-Host "UPX compression: $([math]::Round($after / 1MB, 2)) MB ($ratio%)"
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ChromeGo.exe
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
