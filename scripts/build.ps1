@@ -3,25 +3,34 @@
 
 param(
     [switch]$NoUPX,        # 禁用 UPX 压缩
-    [switch]$Debug         # 调试模式（保留符号信息）
+    [switch]$Debug,        # 调试模式（保留符号信息）
+    [switch]$CI            # CI 模式（GitHub Actions）
 )
 
 $ErrorActionPreference = "Stop"
 
-# 切换到项目根目录
-$projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-if ($PSScriptRoot -like "*scripts*") {
-    $projectRoot = Split-Path -Parent $PSScriptRoot
+# 确定项目根目录
+if ($CI) {
+    # CI 环境下，假设在项目根目录执行
+    $projectRoot = Get-Location
+} else {
+    # 本地环境，脚本在 scripts 目录下
+    $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+    if ($PSScriptRoot -like "*scripts*") {
+        $projectRoot = Split-Path -Parent $PSScriptRoot
+    }
 }
 Push-Location $projectRoot
 
 try {
-    # 清理并创建 dist 目录
-    $distDir = Join-Path $projectRoot "dist"
-    if (Test-Path $distDir) {
-        Remove-Item -Recurse -Force $distDir
+    # 清理并创建 dist 目录（仅本地模式）
+    if (-not $CI) {
+        $distDir = Join-Path $projectRoot "dist"
+        if (Test-Path $distDir) {
+            Remove-Item -Recurse -Force $distDir
+        }
+        New-Item -ItemType Directory -Path $distDir | Out-Null
     }
-    New-Item -ItemType Directory -Path $distDir | Out-Null
 
     # 获取版本信息
     $commit = git rev-parse --short HEAD 2>$null
@@ -53,6 +62,9 @@ try {
     Write-Host "  版本: $version" -ForegroundColor Gray
     Write-Host "  Commit: $commit" -ForegroundColor Gray
     Write-Host "  构建时间: $buildTime" -ForegroundColor Gray
+    if ($CI) {
+        Write-Host "  模式: CI (GitHub Actions)" -ForegroundColor Gray
+    }
 
     # 检查并安装 goversioninfo
     $goversioninfo = Get-Command goversioninfo -ErrorAction SilentlyContinue
@@ -111,8 +123,14 @@ try {
     $ldflags += " -X 'github.com/Virace/chrome-go/internal.Commit=$commit'"
     $ldflags += " -X 'github.com/Virace/chrome-go/internal.BuildTime=$buildTime'"
 
+    # 确定输出路径
+    if ($CI) {
+        $outputPath = Join-Path $projectRoot "ChromeGo.exe"
+    } else {
+        $outputPath = Join-Path $distDir "ChromeGo.exe"
+    }
+
     # 编译
-    $outputPath = Join-Path $distDir "ChromeGo.exe"
     go build -ldflags $ldflags -o $outputPath ./cmd/chromego
 
     if ($LASTEXITCODE -ne 0) {
@@ -144,10 +162,12 @@ try {
         }
     }
 
-    # 清理生成的资源文件
-    $sysoFile = Join-Path $projectRoot "cmd\chromego\resource_windows.syso"
-    if (Test-Path $sysoFile) {
-        Remove-Item $sysoFile -Force
+    # 清理生成的资源文件（仅本地模式，CI 模式下保留以确保构建正确）
+    if (-not $CI) {
+        $sysoFile = Join-Path $projectRoot "cmd\chromego\resource_windows.syso"
+        if (Test-Path $sysoFile) {
+            Remove-Item $sysoFile -Force
+        }
     }
 
     Write-Host "`n构建完成!" -ForegroundColor Green
@@ -156,3 +176,4 @@ try {
 } finally {
     Pop-Location
 }
+

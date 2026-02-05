@@ -8,23 +8,27 @@ import (
 
 // Config 程序配置
 type Config struct {
-	ChromePath        string `json:"chrome_path"`         // Chrome 主程序目录，默认 "App"
-	Channel           string `json:"channel"`             // 更新通道: stable/beta/dev/canary
-	Version           string `json:"version"`             // 当前已安装的 Chrome 版本
-	ChromePlusVersion string `json:"chrome_plus_version"` // 当前已安装的 Chrome++ 版本
-	Threads           int    `json:"threads"`             // 下载线程数，默认 16
-	KeepVersions      int    `json:"keep_versions"`       // 保留旧版本数量，默认 3
+	ChromePath               string `json:"chrome_path"`                 // Chrome 主程序目录，默认 "App"
+	Channel                  string `json:"channel"`                     // 更新通道: stable/beta/dev/canary
+	Version                  string `json:"version"`                     // 当前已安装的 Chrome 版本
+	ChromePlusVersion        string `json:"chrome_plus_version"`         // 当前已安装的 Chrome++ 版本
+	Threads                  int    `json:"threads"`                     // 下载线程数，默认 16
+	KeepVersions             int    `json:"keep_versions"`               // 保留旧版本数量，默认 3
+	SkippedChromeVersion     string `json:"skipped_chrome_version"`      // 用户跳过的 Chrome 版本
+	SkippedChromePlusVersion string `json:"skipped_chrome_plus_version"` // 用户跳过的 Chrome++ 版本
 }
 
 // DefaultConfig 返回默认配置
 func DefaultConfig() *Config {
 	return &Config{
-		ChromePath:        "App",
-		Channel:           "stable",
-		Version:           "",
-		ChromePlusVersion: "",
-		Threads:           16,
-		KeepVersions:      3,
+		ChromePath:               "App",
+		Channel:                  "stable",
+		Version:                  "",
+		ChromePlusVersion:        "",
+		Threads:                  16,
+		KeepVersions:             3,
+		SkippedChromeVersion:     "",
+		SkippedChromePlusVersion: "",
 	}
 }
 

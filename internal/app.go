@@ -56,7 +56,10 @@ func Run() {
 	} else if cfg.Version == "" {
 		needChromeUpdate = true
 	} else if CompareVersion(cfg.Version, latestVersion.ChromeVersion) {
-		needChromeUpdate = true
+		// 检查是否已跳过此版本
+		if cfg.SkippedChromeVersion != latestVersion.ChromeVersion {
+			needChromeUpdate = true
+		}
 	}
 
 	// 判断 Chrome++ 是否需要更新
@@ -66,7 +69,10 @@ func Run() {
 	} else if cfg.ChromePlusVersion == "" {
 		needChromePlusUpdate = true
 	} else if cfg.ChromePlusVersion != latestVersion.ChromePlusVersion {
-		needChromePlusUpdate = true
+		// 检查是否已跳过此版本
+		if cfg.SkippedChromePlusVersion != latestVersion.ChromePlusVersion {
+			needChromePlusUpdate = true
+		}
 	}
 
 	// 都不需要更新，静默退出
@@ -99,11 +105,32 @@ func Run() {
 		for _, u := range updates {
 			message += "• " + u + "\n"
 		}
-		message += "\n请手动关闭浏览器后点击\"是\"开始更新"
+		message += "\n请手动关闭浏览器后点击\"是\"开始更新\n点击\"否\"将跳过此版本"
 	}
 
 	if !ShowConfirm("ChromeGo 更新", message) {
+		// 用户选择跳过，记录跳过的版本
+		configChanged := false
+		if needChromeUpdate && chromeExists {
+			cfg.SkippedChromeVersion = latestVersion.ChromeVersion
+			configChanged = true
+		}
+		if needChromePlusUpdate && chromePlusExists {
+			cfg.SkippedChromePlusVersion = latestVersion.ChromePlusVersion
+			configChanged = true
+		}
+		if configChanged {
+			cfg.Save()
+		}
 		return
+	}
+
+	// 用户确认更新，清除跳过的版本记录
+	if needChromeUpdate {
+		cfg.SkippedChromeVersion = ""
+	}
+	if needChromePlusUpdate {
+		cfg.SkippedChromePlusVersion = ""
 	}
 
 	// 用户确认更新，显示控制台窗口
